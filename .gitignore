@@ -1,3 +1,7 @@
 __pycache__/
 data/
 .DS_Store
+.env
+investment-chatbot
+data
+node_modules

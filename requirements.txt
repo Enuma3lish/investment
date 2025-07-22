@@ -1,4 +1,29 @@
+# Django and DRF
 django==4.2.8
 djangorestframework==3.14.0
-psycopg2==2.9.9 ; platform_machine != "aarch64"
-psycopg2-binary==2.9.9 ; platform_machine == "aarch64"
+
+# PostgreSQL
+psycopg2-binary==2.9.9
+
+# Celery + Redis
+celery==5.3.6
+redis==5.0.4
+django-celery-beat==2.6.0
+django-redis==5.4.0
+
+# CORS
+django-cors-headers==4.3.1
+
+# Image support (optional)
+Pillow==10.3.0
+
+# Taiwan Stock Crawler
+twstock==1.1.1
+# HTTP client for MCP and LLMs
+httpx==0.27.0
+requests==2.31.0
+
+# JWT Auth if needed later
+djangorestframework-simplejwt==5.3.1
+#for pytest
+pytest==8.4.1
