@@ -19,7 +19,7 @@ COPY . .
 RUN dos2unix run_web.sh wait-for-postgres.sh \
     && chmod +x run_web.sh wait-for-postgres.sh
 
-ENV DJANGO_SETTINGS_MODULE=pretest.settings \
+ENV DJANGO_SETTINGS_MODULE=backend.settings \
     POSTGRES_HOST=db \
     POSTGRES_PORT=5432 \
     DJANGO_PORT=8000

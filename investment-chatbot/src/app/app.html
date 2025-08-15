@@ -1,0 +1,25 @@
+<div class="app-container">
+  <header class="header">
+    <div class="header-content">
+      <h1 class="app-title">{{ title }}</h1>
+
+      <!-- ✅ FIXED: Use component property instead of service observable -->
+      <nav *ngIf="isAuthenticated" class="nav">
+        <button (click)="navigateToHome()" class="nav-btn">🏠 Home</button>
+        <button (click)="navigateToPortfolio()" class="nav-btn">💼 Portfolio</button>
+        <button (click)="navigateToTrade()" class="nav-btn">📈 Trade</button>
+        <button (click)="navigateToHistory()" class="nav-btn">📊 History</button>
+        <button (click)="navigateToChatbot()" class="nav-btn">🤖 AI Chat</button>
+        <button (click)="logout()" class="nav-btn logout-btn">🚪 Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="footer" *ngIf="isAuthenticated">
+    <p>&copy; 2024 Investment Chatbot. All rights reserved.</p>
+  </footer>
+</div>

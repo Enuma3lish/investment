@@ -1,0 +1,205 @@
+<div class="trade-container">
+  <div class="header-section">
+    <h2>Stock Trading</h2>
+    <div class="cash-info">
+      <span class="cash-label">Available Cash:</span>
+      <span class="cash-amount">{{ formatCurrency(cashBalance) }}</span>
+    </div>
+  </div>
+
+  <!-- Stock Symbol Input -->
+  <div class="form-section">
+    <div class="form-group">
+      <label for="stockSymbol">Stock Symbol</label>
+      <input
+        id="stockSymbol"
+        type="text"
+        [(ngModel)]="stockSymbol"
+        (input)="onStockSymbolChange()"
+        placeholder="2330"
+        maxlength="4"
+        class="form-control"
+        [class.error]="stockInfo?.status === 'error'"
+      />
+      <small class="form-hint">Enter a 4-digit Taiwan stock code</small>
+    </div>
+
+    <!-- Quantity Input -->
+    <div class="form-group">
+      <label for="quantity">Quantity</label>
+      <input
+        id="quantity"
+        type="number"
+        [(ngModel)]="quantity"
+        min="1"
+        placeholder="1"
+        class="form-control"
+      />
+      <small class="form-hint">Number of shares to trade</small>
+    </div>
+  </div>
+
+  <!-- Stock Information Section -->
+  <div class="stock-info-section">
+    <div class="stock-info-header">
+      <h3>Stock Information</h3>
+      <button
+        *ngIf="stockSymbol.length === 4"
+        (click)="refreshStockInfo()"
+        [disabled]="isLoadingStock"
+        class="refresh-btn">
+        🔄
+      </button>
+    </div>
+
+    <div class="stock-info-content">
+      <!-- Loading State -->
+      <div *ngIf="isLoadingStock" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading stock information...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="stockInfo?.status === 'error'" class="error-state">
+        <div class="error-icon">⚠️</div>
+        <p class="error-text">{{ stockInfo?.error || 'Unknown error occurred' }}</p>
+        <button (click)="fetchStockInfo()" class="retry-btn">Try Again</button>
+      </div>
+
+      <!-- Success State -->
+      <div *ngIf="stockInfo?.status === 'success'" class="success-state">
+        <div class="stock-details">
+          <div class="stock-price">
+            <span class="price-label">Current Price:</span>
+            <span class="price-value">{{ formatCurrency(stockInfo?.price ?? 0) }}</span>
+          </div>
+
+          <!-- ✅ FIXED: Added proper null checks for change information -->
+          <div class="stock-meta" *ngIf="stockInfo && stockInfo.change !== undefined && stockInfo.change !== null">
+            <div class="change-info" [class]="stockInfo.change >= 0 ? 'positive' : 'negative'">
+              <span>{{ stockInfo.change >= 0 ? '+' : '' }}{{ formatCurrency(stockInfo.change) }}</span>
+              <span *ngIf="stockInfo.change_percent !== undefined && stockInfo.change_percent !== null">
+                ({{ stockInfo.change_percent.toFixed(2) }}%)
+              </span>
+            </div>
+          </div>
+
+          <!-- ✅ FIXED: Better null checks for additional info -->
+          <div class="additional-info" *ngIf="stockInfo && (stockInfo.volume || stockInfo.high || stockInfo.low)">
+            <div class="info-item" *ngIf="stockInfo.volume !== undefined && stockInfo.volume !== null">
+              <span class="label">Volume:</span>
+              <span class="value">{{ stockInfo.volume.toLocaleString() }}</span>
+            </div>
+            <div class="info-item" *ngIf="stockInfo.high !== undefined && stockInfo.high !== null">
+              <span class="label">High:</span>
+              <span class="value">{{ formatCurrency(stockInfo.high) }}</span>
+            </div>
+            <div class="info-item" *ngIf="stockInfo.low !== undefined && stockInfo.low !== null">
+              <span class="label">Low:</span>
+              <span class="value">{{ formatCurrency(stockInfo.low) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!stockInfo && !isLoadingStock" class="empty-state">
+        <p>Enter a stock symbol to view information</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Input -->
+  <div class="form-section">
+    <div class="form-group">
+      <label for="price">Price per Share</label>
+      <input
+        id="price"
+        type="number"
+        [(ngModel)]="price"
+        min="0.01"
+        step="0.01"
+        placeholder="Enter your desired price"
+        class="form-control"
+      />
+      <small class="form-hint">Enter the price you want to trade at</small>
+    </div>
+  </div>
+
+  <!-- Trade Type Selection -->
+  <div class="trade-type-section">
+    <h3>Trade Type</h3>
+    <div class="trade-type-buttons">
+      <button
+        (click)="tradeType = 'buy'"
+        [class.active]="tradeType === 'buy'"
+        class="trade-type-btn buy-btn">
+        Buy
+      </button>
+      <button
+        (click)="tradeType = 'sell'"
+        [class.active]="tradeType === 'sell'"
+        class="trade-type-btn sell-btn">
+        Sell
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ FIXED: Added proper null checks for trade summary -->
+  <div class="trade-summary" *ngIf="stockSymbol && price && quantity && price !== '' && quantity > 0">
+    <h3>Trade Summary</h3>
+    <div class="summary-details">
+      <div class="summary-item">
+        <span class="label">Stock:</span>
+        <span class="value">{{ stockSymbol.toUpperCase() }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Quantity:</span>
+        <span class="value">{{ (quantity || 0).toLocaleString() }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Price:</span>
+        <span class="value">{{ formatCurrency(+(price || 0)) }}</span>
+      </div>
+      <div class="summary-item total">
+        <span class="label">Total {{ tradeType === 'buy' ? 'Cost' : 'Proceeds' }}:</span>
+        <span class="value">{{ formatCurrency((+(price || 0)) * (quantity || 0)) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-section">
+    <button
+      (click)="executeTrade()"
+      [disabled]="!stockSymbol || !price || !quantity || isLoadingTrade || isLoadingStock || price === '' || quantity <= 0"
+      class="execute-btn"
+      [class]="tradeType">
+      <span *ngIf="!isLoadingTrade">{{ tradeType === 'buy' ? 'Buy' : 'Sell' }} {{ stockSymbol ? stockSymbol.toUpperCase() : 'Stock' }}</span>
+      <span *ngIf="isLoadingTrade">Processing...</span>
+    </button>
+
+    <div class="secondary-actions">
+      <button (click)="clearForm()" class="clear-btn">Clear Form</button>
+      <button (click)="navigateToPortfolio()" class="nav-btn">View Portfolio</button>
+      <button (click)="navigateToHistory()" class="nav-btn">Trade History</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage && successMessage !== ''" class="success-message">
+    <div class="message-content">
+      <span class="success-icon">✅</span>
+      <span class="message-text">{{ successMessage }}</span>
+      <button (click)="clearMessages()" class="close-btn">×</button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage && errorMessage !== ''" class="error-message">
+    <div class="message-content">
+      <span class="error-icon">❌</span>
+      <span class="message-text">{{ errorMessage }}</span>
+      <button (click)="clearMessages()" class="close-btn">×</button>
+    </div>
+  </div>
+</div>

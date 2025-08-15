@@ -1,0 +1,41 @@
+<div class="history-container">
+  <h2>Trade History</h2>
+
+  <div class="summary" *ngIf="trades.length">
+    <strong>Total Revenue:</strong>
+    <span [ngClass]="{ profit: totalRevenue >= 0, loss: totalRevenue < 0 }">
+      {{ totalRevenue | number:'1.2-2' }}
+    </span>
+  </div>
+
+  <table *ngIf="trades.length; else noTrades">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Symbol</th>
+        <th>Action</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let trade of trades">
+        <td>{{ trade.timestamp | date:'short' }}</td>
+        <td>{{ trade.symbol }}</td>
+        <td>{{ trade.action }}</td>
+        <td>{{ trade.quantity }}</td>
+        <td>{{ trade.price | number:'1.2-2' }}</td>
+        <td [ngClass]="{ profit: trade.action === 'SELL', loss: trade.action === 'BUY' }">
+          {{ getRevenue(trade) | number:'1.2-2' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noTrades>
+    <p>No trade history found.</p>
+  </ng-template>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

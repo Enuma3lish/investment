@@ -1,0 +1,114 @@
+<div class="auth-container">
+  <h2>會員註冊</h2>
+
+  <form (ngSubmit)="onRegister()" #registerForm="ngForm" autocomplete="off">
+    <!-- User Name (英文/數字/底線) -->
+    <div class="form-group">
+      <label for="name">帳號 (只能英文/數字/底線)</label>
+      <input
+        id="name"
+        type="text"
+        name="name"
+        [(ngModel)]="name"
+        required
+        minlength="2"
+        pattern="^[a-zA-Z0-9_]{2,}$"
+        #nameField="ngModel"
+        [class.error]="nameField.invalid && nameField.touched"
+        autocomplete="off"
+      />
+      <div *ngIf="nameField.invalid && nameField.touched" class="field-error">
+        <span *ngIf="nameField.errors?.['required']">請輸入帳號</span>
+        <span *ngIf="nameField.errors?.['minlength']">帳號至少 2 個字</span>
+        <span *ngIf="nameField.errors?.['pattern']">只能英文/數字/底線</span>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        required
+        email
+        #emailField="ngModel"
+        [class.error]="emailField.invalid && emailField.touched"
+        autocomplete="off"
+      />
+      <div *ngIf="emailField.invalid && emailField.touched" class="field-error">
+        <span *ngIf="emailField.errors?.['required']">請輸入 Email</span>
+        <span *ngIf="emailField.errors?.['email']">Email 格式錯誤</span>
+      </div>
+    </div>
+
+    <!-- 密碼 -->
+    <div class="form-group">
+      <label for="password">密碼</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        minlength="6"
+        #passwordField="ngModel"
+        [class.error]="passwordField.invalid && passwordField.touched"
+        autocomplete="new-password"
+      />
+      <div *ngIf="passwordField.invalid && passwordField.touched" class="field-error">
+        <span *ngIf="passwordField.errors?.['required']">請輸入密碼</span>
+        <span *ngIf="passwordField.errors?.['minlength']">密碼至少 6 個字</span>
+      </div>
+    </div>
+
+    <!-- 確認密碼 -->
+    <div class="form-group">
+      <label for="confirmPassword">確認密碼</label>
+      <input
+        id="confirmPassword"
+        type="password"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        required
+        #confirmPasswordField="ngModel"
+        [class.error]="
+          (confirmPasswordField.invalid && confirmPasswordField.touched) ||
+          (password !== confirmPassword && confirmPassword.length > 0)
+        "
+        autocomplete="new-password"
+      />
+      <div *ngIf="confirmPasswordField.invalid && confirmPasswordField.touched" class="field-error">
+        <span *ngIf="confirmPasswordField.errors?.['required']">請再次輸入密碼</span>
+      </div>
+      <div *ngIf="password !== confirmPassword && confirmPassword.length > 0" class="field-error">
+        <span>兩次密碼輸入不一致</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button
+        type="submit"
+        [disabled]="registerForm.invalid || isLoading || password !== confirmPassword"
+        class="register-btn"
+      >
+        <span *ngIf="!isLoading">註冊</span>
+        <span *ngIf="isLoading">註冊中...</span>
+      </button>
+    </div>
+
+    <div class="auth-links">
+      <p>已經有帳號了？<a (click)="navigateToLogin()">登入</a></p>
+    </div>
+
+    <p *ngIf="error" class="error-msg">{{ error }}</p>
+    <p *ngIf="success" class="success-msg">{{ success }}</p>
+  </form>
+
+  <div class="demo-section" *ngIf="!isLoading">
+    <button (click)="fillDemoData()" class="demo-btn">快速填入測試資料</button>
+    <button (click)="clearForm()" class="clear-btn">清空表單</button>
+  </div>
+</div>

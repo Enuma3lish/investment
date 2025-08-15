@@ -1,0 +1,78 @@
+<div class="chat-top-bar">
+  <div class="left">
+    <span class="remaining">Remaining Prompts: {{ remainingPrompts }}</span>
+  </div>
+  <div class="right">
+    <button (click)="logout()">Logout</button>
+    <button (click)="onDeleteAccount()" class="delete-btn">Delete Account</button>
+  </div>
+</div>
+
+<div class="chatbot-container">
+  <h2>Investment Chatbot</h2>
+
+  <div class="input-group">
+    <label for="symbol">Stock Symbol</label>
+    <input
+      [(ngModel)]="symbol"
+      id="symbol"
+      name="symbol"
+      placeholder="e.g. 2330 (TSMC)"
+      required
+      maxlength="4"
+      pattern="[0-9]{4}"
+      autocomplete="off"
+    />
+    <small class="helper-text">Enter a 4-digit Taiwan stock code</small>
+  </div>
+
+  <div class="input-group">
+    <label for="prompt">Your Prompt</label>
+    <textarea
+      [(ngModel)]="prompt"
+      id="prompt"
+      name="prompt"
+      placeholder="Ask about this stock... e.g., 'Should I buy now?' or 'What's the price trend?'"
+      required
+      rows="4"
+      minlength="5"
+      maxlength="1000"
+    ></textarea>
+    <small class="helper-text">{{ prompt.length }}/1000 characters</small>
+  </div>
+
+  <button (click)="submitPrompt()" [disabled]="loading || remainingPrompts <= 0 || !symbol || !prompt">
+    {{ loading ? 'Analyzing...' : 'Submit' }}
+  </button>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Analyzing stock data...</p>
+  </div>
+
+  <div *ngIf="result" class="result">
+    <h3>AI Result:</h3>
+    <pre>{{ result }}</pre>
+  </div>
+</div>
+
+<div class="history-section" *ngIf="paginatedHistory.length > 0">
+  <h3>Prompt History</h3>
+  <ul>
+    <li *ngFor="let h of paginatedHistory">
+      <strong>{{ h.symbol }}</strong>: "{{ h.prompt }}"<br />
+      <small>{{ h.timestamp | date:'short' }}</small><br />
+      <em>{{ h.result }}</em>
+    </li>
+  </ul>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
+    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+.register-container {
+  max-width: 300px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+
+  input {
+    margin: 8px 0;
+    padding: 8px;
+  }
+
+  button {
+    margin-top: 12px;
+  }
+
+  .error {
+    color: red;
+    margin-top: 8px;
+  }
+
+  .success {
+    color: green;
+    margin-top: 8px;
+  }
+}

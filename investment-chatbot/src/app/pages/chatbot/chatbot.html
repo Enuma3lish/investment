@@ -1,0 +1,189 @@
+<div class="chatbot-container">
+  <h2>Investment Chatbot</h2>
+  <p>Remaining prompts: {{ remainingPrompts }}</p>
+
+  <form (ngSubmit)="submitPrompt()">
+    <div class="form-group">
+      <label for="symbol">Stock Symbol</label>
+      <input
+        id="symbol"
+        [(ngModel)]="symbol"
+        name="symbol"
+        placeholder="Stock Symbol (e.g., 2330)"
+        required
+        maxlength="4"
+        pattern="[0-9]{4}"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="prompt">Your Prompt</label>
+      <textarea
+        id="prompt"
+        [(ngModel)]="prompt"
+        name="prompt"
+        placeholder="Ask about the stock..."
+        required
+        rows="4"
+        maxlength="1000"
+      ></textarea>
+      <small>{{ prompt.length }}/1000 characters</small>
+    </div>
+
+    <button type="submit" [disabled]="loading || remainingPrompts <= 0 || !symbol || !prompt" class="submit-btn">
+      {{ loading ? 'Analyzing...' : 'Submit' }}
+    </button>
+  </form>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Analyzing stock data...</p>
+  </div>
+
+  <div *ngIf="result" class="result-container">
+    <h3>📊 AI Analysis Results</h3>
+
+    <!-- Stock Information Header -->
+    <div class="stock-header">
+      <h4>{{ result.symbol?.toUpperCase() }} Analysis</h4>
+      <p class="prompt-echo"><strong>Your Question:</strong> {{ result.prompt }}</p>
+    </div>
+
+    <!-- Technical Analysis Section -->
+    <div class="analysis-section" *ngIf="result.twstock_analysis">
+      <h4>📈 Technical Analysis</h4>
+      <div class="technical-data">
+
+        <!-- Robust Stock Price Info -->
+        <div class="price-info" *ngIf="result.twstock_analysis && result.twstock_analysis.price">
+          <div class="price-display">
+            <span class="current-price">NT${{ result.twstock_analysis.price | number:'1.2-2' }}</span>
+
+            <span class="price-change"
+                  [class.positive]="result.twstock_analysis.change != null && result.twstock_analysis.change >= 0"
+                  [class.negative]="result.twstock_analysis.change != null && result.twstock_analysis.change < 0"
+                  *ngIf="result.twstock_analysis.change != null && result.twstock_analysis.change_percent != null">
+              {{ result.twstock_analysis.change >= 0 ? '+' : '' }}{{ result.twstock_analysis.change | number:'1.2-2' }}
+              ({{ result.twstock_analysis.change_percent >= 0 ? '+' : '' }}{{ result.twstock_analysis.change_percent | number:'1.2-2' }}%)
+            </span>
+
+            <span class="price-info-unavailable"
+                  *ngIf="result.twstock_analysis.change == null || result.twstock_analysis.change_percent == null">
+              Price change data not available
+            </span>
+          </div>
+
+          <!-- Technical indicators, if any -->
+          <div class="best-four-point" *ngIf="result.twstock_analysis.best_four_point">
+            <h5>📊 Technical Analysis</h5>
+            <div class="technical-indicators">
+              <pre class="technical-data">{{ result.twstock_analysis.best_four_point | json }}</pre>
+            </div>
+          </div>
+        </div>
+        <!-- End robust price-info -->
+
+        <!-- Trading Signals -->
+        <div class="signals-container">
+          <div *ngIf="result.twstock_analysis.buy" class="signal buy-signal">
+            <span class="signal-icon">📈</span>
+            <span class="signal-text">Buy Signal Detected</span>
+          </div>
+          <div *ngIf="result.twstock_analysis.sell" class="signal sell-signal">
+            <span class="signal-icon">📉</span>
+            <span class="signal-text">Sell Signal Detected</span>
+          </div>
+          <div *ngIf="!result.twstock_analysis.buy && !result.twstock_analysis.sell" class="signal neutral-signal">
+            <span class="signal-icon">➖</span>
+            <span class="signal-text">Neutral Signal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Analysis Sections -->
+    <div class="ai-analyses">
+      <!-- Claude Analysis -->
+      <div class="ai-section claude-section" *ngIf="result.claude_opinion">
+        <h4>🧠 Claude's Professional Analysis</h4>
+        <div class="ai-response-content">
+          <div class="response-text">{{ result.claude_opinion }}</div>
+        </div>
+      </div>
+
+      <!-- Gemini Analysis -->
+      <div class="ai-section gemini-section" *ngIf="result.gemini_opinion">
+        <h4>🤖 Gemini's Investment Insights</h4>
+        <div class="ai-response-content">
+          <div class="response-text">{{ result.gemini_opinion }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn trade-btn" (click)="navigateToTrade()">
+        📊 Trade {{ result.symbol?.toUpperCase() }}
+      </button>
+      <button class="action-btn portfolio-btn" (click)="navigateToPortfolio()">
+        💼 View Portfolio
+      </button>
+    </div>
+
+    <!-- Raw Data (Collapsible for debugging) -->
+    <details class="debug-section">
+      <summary>🔍 Technical Details (Debug)</summary>
+      <pre class="raw-data">{{ result.raw_data | json }}</pre>
+    </details>
+  </div>
+
+  <!-- History Section -->
+  <div *ngIf="paginatedHistory.length > 0" class="history-section">
+    <h3>📚 Recent Analyses</h3>
+    <div class="history-list">
+      <div *ngFor="let item of paginatedHistory" class="history-item">
+        <div class="history-header">
+          <strong class="history-symbol">{{ item.symbol?.toUpperCase() }}</strong>
+          <small class="history-time">{{ formatTime(item.timestamp) }}</small>
+        </div>
+        <div class="history-question">{{ item.prompt }}</div>
+        <div class="history-status" *ngIf="item.result">
+          <span class="status-badge">✅ Analysis Complete</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="prevPage()" [disabled]="currentPage === 1" class="page-btn">
+        ← Previous
+      </button>
+      <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="page-btn">
+        Next →
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="paginatedHistory.length === 0 && !loading && !result" class="empty-state">
+    <div class="empty-icon">🤖</div>
+    <h3>Ready to Analyze Taiwan Stocks!</h3>
+    <p>Enter a stock symbol and ask any investment question to get started.</p>
+
+    <div class="sample-questions">
+      <h4>Sample Questions:</h4>
+      <div class="question-examples">
+        <button class="example-question" (click)="loadSampleQuestion('2330', 'Should I buy TSMC now?')">
+          "Should I buy TSMC now?"
+        </button>
+        <button class="example-question" (click)="loadSampleQuestion('2317', 'What are the risks of Hon Hai?')">
+          "What are the risks of Hon Hai?"
+        </button>
+        <button class="example-question" (click)="loadSampleQuestion('2454', 'Is MediaTek a good long-term investment?')">
+          "Is MediaTek good long-term?"
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

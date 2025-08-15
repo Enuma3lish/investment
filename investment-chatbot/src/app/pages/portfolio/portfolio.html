@@ -1,0 +1,158 @@
+<div class="portfolio-container">
+  <div class="header-section">
+    <h2>My Portfolio</h2>
+    <div class="action-buttons">
+      <button (click)="refreshPortfolio()" [disabled]="isLoading" class="refresh-btn">
+        <span *ngIf="!isLoading">🔄 Refresh</span>
+        <span *ngIf="isLoading">Loading...</span>
+      </button>
+      <button (click)="resetCashBalance()" [disabled]="isLoadingTrade" class="reset-btn">
+        Reset Balance
+      </button>
+    </div>
+  </div>
+
+  <!-- Cash Balance Section -->
+  <div class="balance-section">
+    <div class="cash-balance">
+      <strong>Cash Balance: {{ formatCurrency(cashBalance) }}</strong>
+    </div>
+    <div class="portfolio-summary" *ngIf="!isPortfolioEmpty">
+      <div class="summary-item">
+        <span>Total Portfolio Value: {{ formatCurrency(totalPortfolioValue) }}</span>
+      </div>
+      <div class="summary-item" [class]="getProfitLossClass(totalProfitLoss)">
+        <span>Total P&L: {{ getProfitLossSymbol(totalProfitLoss) }}{{ formatCurrency(Math.abs(totalProfitLoss)) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-section">
+    <p>Loading portfolio...</p>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+    <button (click)="clearMessages()" class="close-btn">×</button>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+    <button (click)="clearMessages()" class="close-btn">×</button>
+  </div>
+
+  <!-- Portfolio Table -->
+  <div class="portfolio-table-container" *ngIf="!isLoading">
+    <table class="portfolio-table" *ngIf="!isPortfolioEmpty; else emptyPortfolio">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Buy Price</th>
+          <th>Current Price</th>
+          <th>Total Value</th>
+          <th>P&L</th>
+          <th>P&L %</th>
+          <th>Performance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of portfolio" class="portfolio-row">
+          <td class="symbol-cell">
+            <strong>{{ item.symbol }}</strong>
+          </td>
+          <td class="quantity-cell">
+            {{ formatNumber(item.quantity) }}
+          </td>
+          <td class="price-cell">
+            {{ formatCurrency(item.buy_price) }}
+          </td>
+          <td class="price-cell">
+            {{ formatCurrency(item.current_price || item.buy_price) }}
+          </td>
+          <td class="value-cell">
+            {{ formatCurrency(getTotalValue(item)) }}
+          </td>
+          <td class="pl-cell" [class]="getProfitLossClass(item.profit_loss || 0)">
+            {{ getProfitLossSymbol(item.profit_loss || 0) }}{{ formatCurrency(Math.abs(item.profit_loss || 0)) }}
+          </td>
+          <td class="pl-percent-cell" [class]="getProfitLossClass(item.profit_loss || 0)">
+            {{ getProfitLossSymbol(getProfitLossPercentage(item)) }}{{ getProfitLossPercentage(item).toFixed(2) }}%
+          </td>
+          <td class="performance-cell">
+            {{ getStockPerformance(item) }}
+          </td>
+          <td class="actions-cell">
+            <button
+              (click)="buyStock(item.symbol)"
+              [disabled]="isLoadingTrade"
+              class="buy-btn">
+              Buy
+            </button>
+            <button
+              (click)="sellStock(item.symbol, item.quantity)"
+              [disabled]="isLoadingTrade || item.quantity <= 0"
+              class="sell-btn">
+              Sell
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyPortfolio>
+      <div class="empty-portfolio">
+        <div class="empty-message">
+          <h3>Your Portfolio is Empty</h3>
+          <p>Start trading to see your holdings here!</p>
+          <div class="empty-actions">
+            <button (click)="navigateToTrade()" class="trade-btn">
+              Start Trading
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Navigation Section -->
+  <div class="navigation-section" *ngIf="!isLoading">
+    <div class="nav-buttons">
+      <button (click)="navigateToTrade()" class="nav-btn primary">
+        📈 Trade Stocks
+      </button>
+      <button (click)="navigateToTradeHistory()" class="nav-btn secondary">
+        📊 Trade History
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Buy Section for New Stocks -->
+  <div class="quick-trade-section" *ngIf="!isLoading">
+    <h3>Quick Buy New Stock</h3>
+    <div class="quick-trade-form">
+      <input
+        #stockSymbolInput
+        type="text"
+        placeholder="Enter stock symbol (e.g., 2330)"
+        maxlength="4"
+        pattern="[0-9]{4}"
+        class="stock-input">
+      <button
+        (click)="buyStock(stockSymbolInput.value); stockSymbolInput.value=''"
+        [disabled]="isLoadingTrade"
+        class="quick-buy-btn">
+        Quick Buy
+      </button>
+    </div>
+    <p class="hint">Enter a 4-digit Taiwan stock code</p>
+  </div>
+
+  <!-- Trading Status -->
+  <div *ngIf="isLoadingTrade" class="trading-status">
+    <p>Processing trade...</p>
+  </div>
+</div>

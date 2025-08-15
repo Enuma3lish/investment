@@ -1,0 +1,70 @@
+<div class="auth-container">
+  <h2>Login</h2>
+
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm" autocomplete="off">
+    <!-- Username -->
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        name="username"
+        [(ngModel)]="username"
+        required
+        minlength="2"
+        #usernameField="ngModel"
+        [class.error]="usernameField.invalid && usernameField.touched"
+        autocomplete="username"
+        placeholder="Enter your username"
+      />
+      <div *ngIf="usernameField.invalid && usernameField.touched" class="field-error">
+        <span *ngIf="usernameField.errors?.['required']">Please enter your username</span>
+        <span *ngIf="usernameField.errors?.['minlength']">Username must be at least 2 characters</span>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        minlength="6"
+        #passwordField="ngModel"
+        [class.error]="passwordField.invalid && passwordField.touched"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+      />
+      <div *ngIf="passwordField.invalid && passwordField.touched" class="field-error">
+        <span *ngIf="passwordField.errors?.['required']">Please enter your password</span>
+        <span *ngIf="passwordField.errors?.['minlength']">Password must be at least 6 characters</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button
+        type="submit"
+        [disabled]="!isFormValid || isLoading"
+        class="login-btn"
+      >
+        <span *ngIf="!isLoading">Login</span>
+        <span *ngIf="isLoading">Logging in...</span>
+      </button>
+    </div>
+
+    <div class="auth-links">
+      <p>Don't have an account? <a (click)="navigateToRegister()">Register here</a></p>
+    </div>
+
+    <p *ngIf="error" class="error-msg">{{ error }}</p>
+    <p *ngIf="success" class="success-msg">{{ success }}</p>
+  </form>
+
+  <div class="demo-section" *ngIf="!isLoading">
+    <button (click)="fillDemoData()" class="demo-btn">Fill Demo Credentials</button>
+    <button (click)="clearForm()" class="clear-btn">Clear Form</button>
+  </div>
+</div>

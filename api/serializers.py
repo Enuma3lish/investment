@@ -45,7 +45,20 @@ class SellSerializer(serializers.Serializer):
 
 
 class AnalyzeSerializer(serializers.Serializer):
-    stock_id = serializers.CharField()
+    stock_id = serializers.CharField(max_length=10)
+    prompt = serializers.CharField(max_length=1000, required=True)
+    
+    def validate_stock_id(self, value):
+        """Validate Taiwan stock ID format"""
+        if not value.isdigit() or len(value) != 4:
+            raise serializers.ValidationError("Stock ID must be a 4-digit number")
+        return value
+    
+    def validate_prompt(self, value):
+        """Validate prompt is not empty"""
+        if not value.strip():
+            raise serializers.ValidationError("Prompt cannot be empty")
+        return value.strip()
 
 
 class PriceLookupSerializer(serializers.Serializer):

@@ -1,0 +1,128 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .app-title {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      .nav-btn {
+        padding: 10px 16px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        &.logout-btn {
+          background: rgba(231, 76, 60, 0.8);
+
+          &:hover {
+            background: rgba(231, 76, 60, 1);
+          }
+        }
+      }
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 20px;
+  min-height: calc(100vh - 140px);
+}
+
+.footer {
+  background: #34495e;
+  color: white;
+  text-align: center;
+  padding: 15px 20px;
+  margin-top: auto;
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .header .header-content {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+
+    .app-title {
+      font-size: 1.5rem;
+    }
+
+    .nav {
+      flex-wrap: wrap;
+      justify-content: center;
+
+      .nav-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header .header-content .nav {
+    .nav-btn {
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+}

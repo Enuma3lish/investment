@@ -10,6 +10,7 @@ from .views import (
     AnalyzeStockView,
     AnalyzeResultView,
     StockPriceLookupView,
+    UserBalanceView,
 )
 
 urlpatterns = [
@@ -23,4 +24,5 @@ urlpatterns = [
     path("analyze/", AnalyzeStockView.as_view()),
     path("analyze/<str:task_id>/", AnalyzeResultView.as_view()),
     path("price/", StockPriceLookupView.as_view()),
+    path("balance/", UserBalanceView.as_view()),  # NEW: User balance endpoint
 ]
